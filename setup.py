@@ -16,7 +16,7 @@ setup(
     author='Mikhail Korobov',
     author_email='kmike84@gmail.com',
 
-    packages=['robokassa', 'robokassa.migrations'],
+    packages=['robokassa', 'robokassa.south_migrations'],
 
     url='https://bitbucket.org/kmike/django-robokassa/',
     license = 'MIT license',
