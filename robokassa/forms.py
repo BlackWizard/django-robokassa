@@ -4,7 +4,7 @@ from hashlib import md5
 from urllib import urlencode
 from django import forms
 
-from robokassa.conf import LOGIN, PASSWORD1, PASSWORD2
+from robokassa.conf import LOGIN, PASSWORD1, PASSWORD2, TEST_MODE 
 from robokassa.conf import STRICT_CHECK, FORM_TARGET, EXTRA_PARAMS
 from robokassa.models import SuccessNotification
 
@@ -17,9 +17,17 @@ class BaseRobokassaForm(forms.Form):
             self.fields['shp'+key] = forms.CharField(required=False)
             if 'initial' in kwargs:
                 self.fields['shp'+key].initial = kwargs['initial'].get(key, 'None')
+        if TEST_MODE:
+            self.fields['IsTest'] = forms.CharField(required=False)
+            self.fields['IsTest'].initial = '1'
 
     def _append_extra_part(self, standard_part, value_func):
         extra_part = ":".join(["%s=%s" % ('shp'+key, value_func('shp' + key)) for key in EXTRA_PARAMS])
+        if TEST_MODE:
+            if extra_part:
+                return ':'.join([extra_part, 'IsTest=1'])
+            else:
+                extra_part = 'IsTest=1'
         if extra_part:
             return ':'.join([standard_part, extra_part])
         return standard_part
@@ -29,6 +37,8 @@ class BaseRobokassaForm(forms.Form):
         for param in EXTRA_PARAMS:
             if ('shp'+param) in self.cleaned_data:
                 extra[param] = self.cleaned_data['shp'+param]
+        if TEST_MODE:
+            extra['IsTest'] = '1' 
         return extra
 
     def _get_signature(self):
